@@ -211,9 +211,10 @@ typedef void(^ZegoCustomCommandBlock)(int errorCode, NSString *roomID);
 /**
  设置直播事件代理对象
  
- @param liveEventDelegate 遵循 ZegoLiveEventDelegate 协议的代理对象
- @return true 成功，false 失败
- @discussion 设置代理对象成功后，在 [ZegoLiveEventDelegate -zego_onLiveEvent:info:] 中获取直播状态，状态参考 ZegoLiveEvent 定义。未设置代理对象，或对象设置错误，可能导致无法正常收到相关回调
+ * 注意：该代理用于监听直播事件回调，设置代理对象后在 [ZegoLiveEventDelegate -zego_onLiveEvent:info:] 中获取直播事件。
+
+ @param liveEventDelegate 遵循 ZegoLiveEventDelegate 协议的代理对象，SDK 内部会弱引用该对象。
+ @return true 表示调用成功，false 表示调用失败。
  */
 - (bool)setLiveEventDelegate:(id<ZegoLiveEventDelegate>)liveEventDelegate;
 
@@ -226,24 +227,6 @@ typedef void(^ZegoCustomCommandBlock)(int errorCode, NSString *roomID);
  */
 - (bool)setDeviceEventDelegate:(id<ZegoDeviceEventDelegate>)deviceEventDelegate;
 
-
-#if TARGET_OS_IPHONE
-/**
- 暂停模块
- 
- @param moduleType 模块类型，参考 ZegoAPIModuleType 定义
- @discussion 用于需要暂停指定模块的场合，例如来电时暂定音频模块。暂停指定模块后，注意在合适时机下恢复模块
- */
-- (void)pauseModule:(int)moduleType;
-
-/**
- 恢复模块
- 
- @param moduleType 模块类型，参考 ZegoAPIModuleType 定义
- @discussion 用于需要恢复指定模块的场合，例如来电结束后恢复音频模块。暂停指定模块后，注意在合适时机下恢复模块
- */
-- (void)resumeModule:(int)moduleType;
-
 /**
  设置是否允许SDK使用麦克风设备
  
@@ -254,6 +237,32 @@ typedef void(^ZegoCustomCommandBlock)(int errorCode, NSString *roomID);
  @return YES 调用成功，NO 调用失败
  */
 - (BOOL)enableMicDevice:(BOOL)enable;
+
+#if TARGET_OS_IPHONE
+/**
+ 暂停指定模块
+ 
+ * 用于需要暂停指定模块的场合，例如来电时暂停音频模块。
+ 
+ * 注意：
+ * 1.可以在初始化后任意时间调用。
+ * 2.暂停指定模块后，注意在合适时机下调用 [ZegoLiveRoomApi -resumeModule:] 恢复模块。
+
+ @param moduleType 模块类型, 参考 ZegoAPIModuleType。
+ */
+- (void)pauseModule:(int)moduleType;
+
+/**
+ 恢复指定模块
+ 
+ * 用于暂停模块后需要恢复模块的场合，例如来电结束后恢复音频模块。
+ 
+ * 注意：可以在初始化后任意时间调用。
+
+ @param moduleType 模块类型, 参考 ZegoAPIModuleType。
+ */
+- (void)resumeModule:(int)moduleType;
+
 #endif
 
 #if TARGET_OS_OSX
@@ -574,14 +583,20 @@ typedef enum : NSUInteger {
 
 #endif /* Zego_Live_Event */
 
+/**
+ 直播事件代理
+ */
 @protocol ZegoLiveEventDelegate <NSObject>
 
 /**
  直播事件回调
  
- @param event 直播事件状态，参考 ZegoLiveEvent 定义
- @param info 信息
- @discussion 调用 [ZegoLiveRoomApi -setLiveEventDelegate] 设置直播事件代理对象后，在此回调中获取直播事件状态
+ * 用于监听流卡顿、推拉流重试操作等 SDK 事件。
+ 
+ * 注意：info 目前的结构为 @{@"StreamID":EventStreamID}。
+
+ @param event 发生的直播事件
+ @param info 事件相关信息
  */
 - (void)zego_onLiveEvent:(ZegoLiveEvent)event info:(NSDictionary<NSString*, NSString*>*)info;
 
@@ -592,7 +607,7 @@ typedef enum : NSUInteger {
 /**
  设备事件回调
  
- @param deviceName 设备类型名称。返回值 kZegoDeviceCameraName 或 kZegoDeviceMicrophoneName
+ @param deviceName 设备类型名称。返回值 kZegoDeviceCameraName/kZegoDeviceMicrophoneName/kZegoDeviceAudioName
  @param errorCode 错误码。 返回值参考 ZegoAPIDeviceErrorCode 定义
  @discussion 调用 [ZegoLiveRoomApi -setDeviceEventDelegate] 设置设备事件代理对象后，在此回调中获取设备状态或错误
  */
