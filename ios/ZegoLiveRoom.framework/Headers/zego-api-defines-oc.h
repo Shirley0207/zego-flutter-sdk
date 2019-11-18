@@ -698,10 +698,52 @@ typedef enum : NSInteger
 {
     /** 一般性错误 */
     ZEGOAPI_DEVICE_ERROR_GENERIC = -1,
+    /** 无效设备 ID */
+    ZEGOAPI_DEVICE_ERROR_INVALID_ID = -2,
     /** 没有权限 */
     ZEGOAPI_DEVICE_ERROR_NO_AUTHORIZATION = -3,
     /** 采集帧率为0 */
     ZEGOAPI_DEVICE_ERROR_ZERO_FPS = -4,
+    /** 设备被占用 */
+    ZEGOAPI_DEVICE_ERROR_IN_USE_BY_OTHER = -5,
+    /** 设备未插入 */
+    ZEGOAPI_DEVICE_ERROR_UNPLUGGED = -6,
+    /** 媒体服务无法恢复 */
+    ZEGOAPI_DEVICE_ERROR_MEDIA_SERVICES_LOST = -8,
+
 } ZegoAPIDeviceErrorCode;
+
+typedef enum : NSInteger
+{
+    /** 一般性错误 */
+    ZEGOAPI_DEVICE_ERROR_REASON_GENERIC = -1,
+    /** 无效设备 ID */
+    ZEGOAPI_DEVICE_ERROR_REASON_INVALID_ID = -2,
+    /** 没有权限 */
+    ZEGOAPI_DEVICE_ERROR_REASON_NO_AUTHORIZATION = -3,
+    /** 采集帧率为0 */
+    ZEGOAPI_DEVICE_ERROR_REASON_ZERO_FPS = -4,
+    /** 设备被占用 */
+    ZEGOAPI_DEVICE_ERROR_REASON_IN_USE_BY_OTHER = -5,
+    /** 设备未插入 */
+    ZEGOAPI_DEVICE_ERROR_REASON_UNPLUGGED = -6,
+    /** 媒体服务无法恢复 */
+    ZEGOAPI_DEVICE_ERROR_REASON_MEDIA_SERVICES_LOST = -8,
+    /** 没有错误 */
+    ZEGOAPI_DEVICE_ERROR_REASON_NONE = 0,
+    /** 禁用 */
+    ZEGOAPI_DEVICE_ERROR_REASON_DISABLED = 2,
+    /** 屏蔽采集 */
+    ZEGOAPI_DEVICE_ERROR_REASON_MUTE = 3,
+    /** 中断 */
+    ZEGOAPI_DEVICE_ERROR_REASON_INTERRUPTION = 4,
+    /** 在后台 */
+    ZEGOAPI_DEVICE_ERROR_REASON_IN_BACKGROUND = 5,
+    /** 前台有多个 APP 运行 */
+    ZEGOAPI_DEVICE_ERROR_REASON_MULTI_FOREGROUND_APP = 6,
+    /** 系统压力过大 */
+    ZEGOAPI_DEVICE_ERROR_REASON_SYSTEM_PRESSURE = 7,
+
+}ZegoAPIDeviceErrorReason;
 
 #endif /* zego_api_defines_oc_h */

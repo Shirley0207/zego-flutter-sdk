@@ -3,6 +3,8 @@ package com.zego.zegoliveroomplugin;
 import android.app.Application;
 import android.content.Context;
 import android.view.Surface;
+import android.os.Looper;
+import android.os.Handler;
 
 
 import io.flutter.plugin.common.EventChannel;
@@ -20,6 +22,7 @@ import java.util.*;
 import java.lang.*;
 
 import com.zego.zegoavkit2.ZegoStreamExtraPlayInfo;
+import com.zego.zegoavkit2.entities.ZegoStreamRelayCDNInfo;
 import com.zego.zegoavkit2.error.ZegoError;
 import com.zego.zegoavkit2.mediaside.IZegoMediaSideCallback;
 import com.zego.zegoavkit2.mediaside.ZegoMediaSideInfo;
@@ -33,6 +36,8 @@ import com.zego.zegoliveroom.callback.IZegoEndJoinLiveCallback;
 import com.zego.zegoliveroom.callback.IZegoInitSDKCompletionCallback;
 import com.zego.zegoliveroom.callback.IZegoLiveEventCallback;
 import com.zego.zegoliveroom.callback.IZegoLivePlayerCallback;
+import com.zego.zegoliveroom.callback.IZegoLivePublisherExCallback;
+import com.zego.zegoliveroom.callback.IZegoUpdatePublishTargetCallback;
 import com.zego.zegoliveroom.callback.IZegoLivePlayerCallback2;
 import com.zego.zegoliveroom.callback.IZegoLivePublisherCallback;
 import com.zego.zegoliveroom.callback.IZegoLoginCompletionCallback;
@@ -728,6 +733,61 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
       boolean success = mZegoLiveRoom.setAppOrientation(orientation);
       result.success(success);
 
+    } else if(call.method.equals("setPublishConfig")) {
+
+      if(mZegoLiveRoom == null) {
+        throwSdkNotInitError(result, call.method);
+        return;
+      }
+
+      HashMap<String, Object> config = new HashMap<>();
+      config.put(ZegoConstants.PublishConfig.PUBLISH_CUSTOM_TARGET, call.argument("rtmpURL"));
+      mZegoLiveRoom.setPublishConfig(config);
+
+      result.success(true);
+
+    } else if(call.method.equals("addPublishTarget")) {
+
+      if(mZegoLiveRoom == null) {
+        throwSdkNotInitError(result, call.method);
+        return;
+      }
+
+      String target = call.argument("target");
+      String streamID = call.argument("streamID");
+
+      mZegoLiveRoom.addPublishTarget(target, streamID, new IZegoUpdatePublishTargetCallback() {
+        @Override
+        public void onUpdatePublishTargetState(int errorCode, String streamID) {
+          HashMap<String, Object> mapResult = new HashMap<>();
+          mapResult.put("errorCode", errorCode);
+          mapResult.put("streamID", streamID);
+
+          result.success(mapResult);
+        }
+      });
+
+    } else if(call.method.equals("deletePublishTarget")) {
+
+      if(mZegoLiveRoom == null) {
+        throwSdkNotInitError(result, call.method);
+        return;
+      }
+
+      String target = call.argument("target");
+      String streamID = call.argument("streamID");
+
+      mZegoLiveRoom.deletePublishTarget(target, streamID, new IZegoUpdatePublishTargetCallback() {
+        @Override
+        public void onUpdatePublishTargetState(int errorCode, String streamID) {
+          HashMap<String, Object> mapResult = new HashMap<>();
+          mapResult.put("errorCode", errorCode);
+          mapResult.put("streamID", streamID);
+
+          result.success(mapResult);
+        }
+      });
+
     } else if(call.method.equals("respondJoinLiveReq")) {
 
       if(mZegoLiveRoom == null) {
@@ -896,14 +956,18 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
       ZegoPlatformView view = null;
 
       if(mIsEnablePlatformView) {
-
-        int viewID = numberToIntValue((Number) call.argument("viewID"));
-        view = ZegoPlatformViewFactory.shareInstance().getPlatformView(viewID);
-        //传入错误的view id
-        if(view == null) {
-            result.success(false);
-            return;
+        
+        // 只有音视频场景下严格检查viewID的合法性，纯音频场景下允许不填viewID（viewID为空）
+        if(call.argument("viewID") != null) {
+          int viewID = numberToIntValue((Number) call.argument("viewID"));
+          view = ZegoPlatformViewFactory.shareInstance().getPlatformView(viewID);
+          //传入错误的view id
+          if(view == null) {
+              result.success(false);
+              return;
+          }
         }
+
       } else {
 
         if(mRenders.containsKey(streamID)) {
@@ -933,10 +997,10 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
         extraPlayInfo.rtmpUrls = (String[])rtmpUrls.toArray(new String[0]);
         extraPlayInfo.flvUrls =  (String[])flvUrls.toArray(new String[0]);
 
-        success = mZegoLiveRoom.startPlayingStream(streamID, mIsEnablePlatformView ? view.getSurfaceView() : surface, extraPlayInfo);
+        success = mZegoLiveRoom.startPlayingStream(streamID, mIsEnablePlatformView ? view != null ? view.getSurfaceView() : null : surface, extraPlayInfo);
       } else {
 
-        success = mZegoLiveRoom.startPlayingStream(streamID, mIsEnablePlatformView ? view.getSurfaceView() : surface);
+        success = mZegoLiveRoom.startPlayingStream(streamID, mIsEnablePlatformView ? view != null ? view.getSurfaceView() : null : surface);
       }
 
       result.success(success);
@@ -1663,7 +1727,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
           }
 
           @Override
-          public void onKickOut(int reason, String roomID) {
+          public void onKickOut(int reason, String roomID, String customReason) {
               if(mEventSink != null) {
 
                   HashMap<String, Object> returnMap = new HashMap<>();
@@ -1673,6 +1737,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
                   method.put("name", "onKickOut");
                   method.put("roomID", roomID);
                   method.put("reason", reason);
+                  method.put("customReason", customReason);
 
                   returnMap.put("method", method);
                   mEventSink.success(returnMap);
@@ -1884,6 +1949,36 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
           }
       });
 
+      mZegoLiveRoom.setZegoLivePublisherExCallback(new IZegoLivePublisherExCallback() {
+        @Override
+        public void onRelayCDNStateUpdate(ZegoStreamRelayCDNInfo[] stateInfo, String streamID) {
+          ZegoLogJNI.logNotice("[Flutter-Native] onRelayCDNStateUpdate enter, sink: " + mEventSink);
+          if(mEventSink != null) {
+            ArrayList<HashMap<String, Object>> infoList = new ArrayList<>();
+            for (ZegoStreamRelayCDNInfo info : stateInfo) {
+              HashMap<String, Object> map = new HashMap<>();
+              map.put("datail", info.detail);
+              map.put("rtmpURL", info.rtmpURL);
+              map.put("state", info.state);
+              map.put("stateTime", info.stateTime);
+              infoList.add(map);
+            }
+
+            HashMap<String, Object> returnMap = new HashMap<>();
+            returnMap.put("type", EVENT_TYPE.TYPE_PUBLISH_EVENT.ordinal());
+
+            HashMap<String, Object> method = new HashMap<>();
+            method.put("name", "onRelayCDNStateUpdate");
+            method.put("stateInfo", infoList);
+            method.put("streamID", streamID);
+
+            returnMap.put("method", method);
+            ZegoLogJNI.logNotice("[Flutter-Native] onRelayCDNStateUpdate, return map: " + returnMap);
+            mEventSink.success(returnMap);
+          }
+        }
+      });
+
       mZegoLiveRoom.setZegoLivePlayerCallback(new IZegoLivePlayerCallback2() {
           @Override
           public void onPlayStateUpdate(int stateCode, String streamID) {
@@ -2004,7 +2099,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
           }
 
           @Override
-          public void onRemoteCameraStatusUpdate(String streamID, int status) {
+          public void onRemoteCameraStatusUpdate(String streamID, int status, int reason) {
 
               if(mEventSink != null) {
                   HashMap<String, Object> returnMap = new HashMap<>();
@@ -2014,6 +2109,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
                   method.put("name", "onRemoteCameraStatusUpdate");
                   method.put("streamID", streamID);
                   method.put("status", status);
+                  method.put("reason", reason);
 
                   returnMap.put("method", method);
                   mEventSink.success(returnMap);
@@ -2021,7 +2117,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
           }
 
           @Override
-          public void onRemoteMicStatusUpdate(String streamID, int status) {
+          public void onRemoteMicStatusUpdate(String streamID, int status, int reason) {
 
               if(mEventSink != null) {
                   HashMap<String, Object> returnMap = new HashMap<>();
@@ -2031,6 +2127,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
                   method.put("name", "onRemoteMicStatusUpdate");
                   method.put("streamID", streamID);
                   method.put("status", status);
+                  method.put("reason", reason);
 
                   returnMap.put("method", method);
                   mEventSink.success(returnMap);
@@ -2137,7 +2234,21 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
           }
       });
 
-      mZegoMediaSideInfo = new ZegoMediaSideInfo();
+    byte[] appSign = convertStringToSign(strAppSign);
+    boolean success = mZegoLiveRoom.initSDK(appID, appSign, new IZegoInitSDKCompletionCallback() {
+
+      @Override
+      public void onInitSDK(int i) {
+
+        ZegoLogJNI.logNotice("[Flutter-Native] on init sdk, errorCode: " + i);
+        result.success(i);
+      }
+    });
+
+    if(!success)
+      result.success(false);
+
+    mZegoMediaSideInfo = new ZegoMediaSideInfo();
       mZegoMediaSideInfo.setZegoMediaSideCallback(new IZegoMediaSideCallback() {
           @Override
           public void onRecvMediaSideInfo(String streamID, ByteBuffer data, int dataLen) {
@@ -2170,7 +2281,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
 
                   String strData = new String(tempBuffer);
 
-                  HashMap<String, Object> returnMap = new HashMap<>();
+                  final HashMap<String, Object> returnMap = new HashMap<>();
                   returnMap.put("type", EVENT_TYPE.TYPE_MEDIA_SIDE_INFO_EVENT.ordinal());
 
                   HashMap<String, Object> method = new HashMap<>();
@@ -2179,24 +2290,16 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
                   method.put("data", strData);
 
                   returnMap.put("method", method);
-                  mEventSink.success(returnMap);
+                  Handler mainHandler = new Handler(Looper.getMainLooper());
+                  mainHandler.post(new Runnable() {
+                      @Override
+                      public void run() {
+                          mEventSink.success(returnMap);
+                      }
+                  });
               }
           }
       });
-
-    byte[] appSign = convertStringToSign(strAppSign);
-    boolean success = mZegoLiveRoom.initSDK(appID, appSign, new IZegoInitSDKCompletionCallback() {
-
-      @Override
-      public void onInitSDK(int i) {
-
-        ZegoLogJNI.logNotice("[Flutter-Native] on init sdk, errorCode: " + i);
-        result.success(i);
-      }
-    });
-
-    if(!success)
-      result.success(false);
 
   }
 

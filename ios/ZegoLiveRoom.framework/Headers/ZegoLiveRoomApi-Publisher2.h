@@ -28,6 +28,14 @@ typedef void(^ZegoUpdatePublishTargetCompletionBlock)(int errorCode, NSString *s
 - (bool)setPreviewView:(ZEGOView *)view channelIndex:(ZegoAPIPublishChannelIndex)index;
 
 /**
+ 设置预览控件的背景颜色
+ @param color 颜色,取值为0x00RRGGBB
+ @param index 推流 channel Index
+ @return true 表示调用成功，false 表示调用失败。
+ */
+- (bool)setPreviewViewBackgroundColor:(int)color channelIndex:(ZegoAPIPublishChannelIndex)index;
+
+/**
  启动本地预览
  
  * 注意：

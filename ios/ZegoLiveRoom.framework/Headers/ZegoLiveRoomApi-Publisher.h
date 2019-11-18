@@ -56,6 +56,13 @@
 - (bool)setPreviewView:(ZEGOView *)view;
 
 /**
+ 设置预览控件的背景颜色
+ @param color 颜色,取值为0x00RRGGBB
+ @return true 表示调用成功，false 表示调用失败。
+ */
+- (bool)setPreviewViewBackgroundColor:(int)color;
+
+/**
  启动本地预览
  
  * 注意：

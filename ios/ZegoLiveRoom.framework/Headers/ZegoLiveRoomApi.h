@@ -458,9 +458,23 @@ typedef void(^ZegoCustomCommandBlock)(int errorCode, NSString *roomID);
  @discussion "audio_session_mix_with_others", bool value, default: true. set AVAudioSessionCategoryOptionMixWithOthers
  @discussion "support_general_mode_below_ios9", bool value, default: false. support general mode below ios 9.0
  @discussion "play_nodata_abort", bool value, default: false，设置拉流时没拉到数据是否终止拉流，设置为false表示不终止，设置为true表示终止，拉流之前调用有效
+ @discussion "room_retry_time", uint32 value, default:300S，设置房间异常后自动恢复最大重试时间，SDK尽最大努力恢复，单位为S，SDK默认为300s，设置为0时不重试
+ @discussion "av_retry_time", uint32 value, default:300S，设置推拉流异常后自动恢复最大重试时间，SDK尽最大努力恢复，单位为S，SDK默认为300s，设置为0时不重试
  */
 + (void)setConfig:(NSString *)config;
 
+/**
+ 给推流通道设置扩展参数，一般不建议修改
+
+@param param_config 参数配置信息
+@param idx 推流通道索引，默认主通道
+
+@attention 配置项写法，例如 "zego_channel_param_key_video_swencoder_usage=camera", 等号后面值的类型要看下面每一项的定义
+@attention "zego_channel_param_key_video_swencoder_usage", string value: camera|screen，设置编码时使用场景模式，仅使用 OpenH264 编码时有效
+@attention "zego_channel_param_key_video_x264_config_tune", string value: animation, 设置编码的 tune 值，目前只支持 animation，仅使用 X264 编码时有效
+@attention 初始化 SDK 之后推流前设置才生效，推流过程中设置无效
+*/
+- (void)setChannelExtraParam:(NSString *)param_config channelIndex:(ZegoAPIPublishChannelIndex)channelIndex;
 
 /**
  设置 LogInfo 代理对象
@@ -478,13 +492,22 @@ typedef void(^ZegoCustomCommandBlock)(int errorCode, NSString *roomID);
 @optional
 
 /**
+用户被踢出房间
+
+@param reason 被踢出原因
+@param roomID 房间 ID
+@warning Deprecated, 请使用onKickOut:roomID:customReason
+ */
+- (void)onKickOut:(int)reason roomID:(NSString *)roomID;
+
+/**
  用户被踢出房间
  
  @param reason 被踢出原因
  @param roomID 房间 ID
  @discussion 可在该回调中处理用户被踢出房间后的下一步处理（例如报错、重新登录提示等）
  */
-- (void)onKickOut:(int)reason roomID:(NSString *)roomID;
+- (void)onKickOut:(int)reason roomID:(NSString *)roomID customReason:(NSString *)customReason;
 
 /**
  与 server 断开通知
