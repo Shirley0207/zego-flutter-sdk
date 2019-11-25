@@ -47,7 +47,7 @@ public class ZegoPlatformViewFactory extends PlatformViewFactory{
 
     @Override
     public PlatformView create(Context context, int viewID, Object args) {
-        ZegoPlatformView view = new ZegoPlatformView(context);
+        ZegoPlatformView view = new ZegoPlatformView(context, viewID);
         addView(viewID, view);
 
         return view;
