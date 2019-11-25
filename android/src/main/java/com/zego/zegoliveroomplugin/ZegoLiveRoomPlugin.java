@@ -682,9 +682,9 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
       if(view != null) {
           int width = view.getSurfaceView().getHolder().getSurfaceFrame().width();
           int height = view.getSurfaceView().getHolder().getSurfaceFrame().height();
-          ZegoLogJNI.logNotice("[SetPreviewView - PlatformView] view size: " + "(" + width + ", " + height + ")");
+          ZegoLogJNI.logNotice("[SetPreviewView - ZegoPlatformView] view size: " + "(" + width + ", " + height + ")" + "viewID:" + viewID);
       }else {
-          ZegoLogJNI.logNotice("[SetPreviewView - PlatformView] no such view");
+
       }
       if(view == null) {
         result.success(false);
@@ -971,9 +971,9 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
           if(view != null) {
             int width = view.getSurfaceView().getHolder().getSurfaceFrame().width();
             int height = view.getSurfaceView().getHolder().getSurfaceFrame().height();
-            ZegoLogJNI.logNotice("[StartPlayingStream - PlatformView] view size: " + "(" + width + ", " + height + ")");
+            ZegoLogJNI.logNotice("[StartPlayingStream - ZegoPlatformView] view size: " + "(" + width + ", " + height + ")" + "viewID: " + viewID);
           } else {
-            ZegoLogJNI.logNotice("[StartPlayingStream - PlatformView] no such view");
+            ZegoLogJNI.logNotice("[StartPlayingStream - ZegoPlatformView] no such view");
           }
           //传入错误的view id
           if(view == null) {
@@ -1234,6 +1234,7 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
       }
 
       int viewID = numberToIntValue((Number) call.argument("viewID"));
+      ZegoLogJNI.logNotice("ZegoPlatformView Remove, viewID: " + viewID);
       boolean success = ZegoPlatformViewFactory.shareInstance().removeView(viewID);
       result.success(success);
 

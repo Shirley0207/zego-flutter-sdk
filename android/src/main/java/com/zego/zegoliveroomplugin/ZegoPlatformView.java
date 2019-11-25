@@ -13,6 +13,7 @@ public class ZegoPlatformView implements PlatformView {
     private int mViewID;
     public ZegoPlatformView(Context context, int viewID) {
         this.mSurfaceView = new SurfaceView(context);
+        ZegoLogJNI.logNotice("ZegoPlatformView new, viewID: "+ viewID + " context: " + context);
         mViewID = viewID;
         this.mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override

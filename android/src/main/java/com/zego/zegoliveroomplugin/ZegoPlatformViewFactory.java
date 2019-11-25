@@ -26,27 +26,34 @@ public class ZegoPlatformViewFactory extends PlatformViewFactory{
     private ZegoPlatformViewFactory(MessageCodec<Object> createArgsCodec) {
         super(createArgsCodec);
         mViews = new HashMap<>();
+        ZegoLogJNI.logNotice("ZegoPlatformViewFactory create");
     }
 
     public void addView(int viewID, ZegoPlatformView view) {
+        ZegoLogJNI.logNotice("ZegoPlatformView, addView: " + viewID);
         mViews.put(Integer.valueOf(viewID), view);
     }
 
     public boolean removeView(int viewID) {
 
-        if(!mViews.containsKey(Integer.valueOf(viewID)))
+        if(!mViews.containsKey(Integer.valueOf(viewID))) {
+            ZegoLogJNI.logNotice("ZegoPlatformView, removeView (" + viewID + ") failed, no such view");
             return false;
+        }
 
         mViews.remove(Integer.valueOf(viewID));
+        ZegoLogJNI.logNotice("ZegoPlatformView, removeView (" + viewID + ") success");
         return true;
     }
 
     public ZegoPlatformView getPlatformView(int viewID) {
+        ZegoLogJNI.logNotice("ZegoPlatformView, getView: " + viewID);
         return mViews.get(Integer.valueOf(viewID));
     }
 
     @Override
     public PlatformView create(Context context, int viewID, Object args) {
+        ZegoLogJNI.logNotice("ZegoPlatFormViewFactory create view, viewID: " + viewID);
         ZegoPlatformView view = new ZegoPlatformView(context, viewID);
         addView(viewID, view);
 
