@@ -2,6 +2,7 @@ package com.zego.zegoliveroomplugin;
 
 import android.content.Context;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 import io.flutter.plugin.common.MessageCodec;
@@ -13,7 +14,7 @@ public class ZegoPlatformViewFactory extends PlatformViewFactory{
 
     private static ZegoPlatformViewFactory sInstance;
 
-    private HashMap<Integer, ZegoPlatformView> mViews;
+    private HashMap<Integer, WeakReference<ZegoPlatformView>> mViews;
 
     public static ZegoPlatformViewFactory shareInstance() {
         if(sInstance == null) {
@@ -31,7 +32,9 @@ public class ZegoPlatformViewFactory extends PlatformViewFactory{
 
     public void addView(int viewID, ZegoPlatformView view) {
         ZegoLogJNI.logNotice("ZegoPlatformView, addView: " + viewID);
-        mViews.put(Integer.valueOf(viewID), view);
+
+        WeakReference<ZegoPlatformView> weakView = new WeakReference<ZegoPlatformView>(view);
+        mViews.put(Integer.valueOf(viewID), weakView);
     }
 
     public boolean removeView(int viewID) {
@@ -48,12 +51,23 @@ public class ZegoPlatformViewFactory extends PlatformViewFactory{
 
     public ZegoPlatformView getPlatformView(int viewID) {
         ZegoLogJNI.logNotice("ZegoPlatformView, getView: " + viewID);
-        return mViews.get(Integer.valueOf(viewID));
+
+        WeakReference<ZegoPlatformView> weakView =  mViews.get(Integer.valueOf(viewID));
+        return weakView.get();
     }
 
     @Override
     public PlatformView create(Context context, int viewID, Object args) {
-        ZegoLogJNI.logNotice("ZegoPlatFormViewFactory create view, viewID: " + viewID);
+
+        ZegoLogJNI.logNotice("ZegoPlatFormViewFactory create view, viewID: " + viewID + ", args: " + args);
+       /*System.out.println("[ZegoPlatformViewfactory] create view, viewID: " + viewID + ", args: " + args);
+        HashMap<String, Object> map = (HashMap<String, Object>) args;
+        Integer objWidth = (Integer) map.get("width");
+        Integer objHeight = (Integer) map.get("height");
+        Boolean objIsSurfaceView = (Boolean) map.get("isSurfaceView");
+        int width = objWidth != null ? objWidth.intValue() : 0;
+        int height = objHeight != null ? objHeight.intValue() : 0;
+        boolean isSurfaceView = objIsSurfaceView != null ? objIsSurfaceView.booleanValue() : true;*/
         ZegoPlatformView view = new ZegoPlatformView(context, viewID);
         addView(viewID, view);
 
