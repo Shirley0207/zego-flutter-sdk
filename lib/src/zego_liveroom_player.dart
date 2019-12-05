@@ -79,7 +79,7 @@ class ZegoLiveRoomPlayerPlugin {
   ///
   ///@param View创建后的回调，viewID 为 Platform View 的唯一标识，请开发者自行管理
   ///@discussion 只有当 [ZegoLiveRoomPlugin.enablePlatformView] 传值为 true 时，调用该API有效，否则会返回错误
-  static Widget createPlayPlatformView(String streamID, Function(int viewID) onViewCreated) {
+  static Widget createPlayPlatformView(String streamID, Function(int viewID) onViewCreated, {Map<String, dynamic> args}) {
     if(TargetPlatform.iOS == defaultTargetPlatform) {
 
       return UiKitView(
@@ -88,7 +88,9 @@ class ZegoLiveRoomPlayerPlugin {
           onPlatformViewCreated: (int viewID) {
             if(onViewCreated != null)
               onViewCreated(viewID);
-          }
+          },
+          creationParams: args,
+          creationParamsCodec: const StandardMessageCodec(),
       );
     } else if(TargetPlatform.android == defaultTargetPlatform) {
 
@@ -99,6 +101,8 @@ class ZegoLiveRoomPlayerPlugin {
           if(onViewCreated != null)
             onViewCreated(viewID);
         },
+        creationParams: args,
+        creationParamsCodec: const StandardMessageCodec(),
       );
     }
 

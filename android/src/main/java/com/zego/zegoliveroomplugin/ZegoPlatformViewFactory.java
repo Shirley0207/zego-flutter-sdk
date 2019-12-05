@@ -60,15 +60,20 @@ public class ZegoPlatformViewFactory extends PlatformViewFactory{
     public PlatformView create(Context context, int viewID, Object args) {
 
         ZegoLogJNI.logNotice("ZegoPlatFormViewFactory create view, viewID: " + viewID + ", args: " + args);
-       /*System.out.println("[ZegoPlatformViewfactory] create view, viewID: " + viewID + ", args: " + args);
         HashMap<String, Object> map = (HashMap<String, Object>) args;
+        Integer objWidth = (Integer) map.get("width");
+        Integer objHeight = (Integer) map.get("height");
+        int width = objWidth != null ? objWidth.intValue() : 0;
+        int height = objHeight != null ? objHeight.intValue() : 0;
+       /*System.out.println("[ZegoPlatformViewfactory] create view, viewID: " + viewID + ", args: " + args);
+
         Integer objWidth = (Integer) map.get("width");
         Integer objHeight = (Integer) map.get("height");
         Boolean objIsSurfaceView = (Boolean) map.get("isSurfaceView");
         int width = objWidth != null ? objWidth.intValue() : 0;
         int height = objHeight != null ? objHeight.intValue() : 0;
         boolean isSurfaceView = objIsSurfaceView != null ? objIsSurfaceView.booleanValue() : true;*/
-        ZegoPlatformView view = new ZegoPlatformView(context, viewID);
+        ZegoPlatformView view = new ZegoPlatformView(context, viewID, width, height);
         addView(viewID, view);
 
         return view;

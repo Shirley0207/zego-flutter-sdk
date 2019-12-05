@@ -18,13 +18,17 @@ public class ZegoPlatformView implements PlatformView , SurfaceHolder.Callback{
     //private Surface mSurface;
     private int mViewID;
     //private boolean mIsSurface;
-    public ZegoPlatformView(Context context, int viewID/*, boolean isSurface, int width, int height*/) {
+    public ZegoPlatformView(Context context, int viewID, int width, int height/*, boolean isSurface, int width, int height*/) {
         //mIsSurface = isSurface;
         //if(mIsSurface) {
         this.mSurfaceView = new SurfaceView(context);
         this.mSurfaceView.getHolder().addCallback(this);
+        if(width != 0 && height != 0)
+        {
+            this.mSurfaceView.getHolder().setFixedSize(width, height);
+        }
 
-        ZegoLogJNI.logNotice("ZegoPlatformView new, viewID: "+ viewID + " context: " + context /*+ "is surface view: " + mIsSurface + ", width :" + width + ", height: " + height*/);
+        ZegoLogJNI.logNotice("ZegoPlatformView new, viewID: "+ viewID + " context: " + context + ", width :" + width + ", height: " + height);
         mViewID = viewID;
     }
 
