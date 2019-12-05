@@ -3,19 +3,20 @@ package com.zego.zegoliveroomplugin;
 import android.content.Context;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 
 import io.flutter.plugin.platform.PlatformView;
 
 public class ZegoPlatformView implements PlatformView {
 
-    private SurfaceView mSurfaceView;
+    private TextureView mSurfaceView;
     private int mViewID;
     public ZegoPlatformView(Context context, int viewID) {
-        this.mSurfaceView = new SurfaceView(context);
+        this.mSurfaceView = new TextureView(context);
         ZegoLogJNI.logNotice("ZegoPlatformView new, viewID: "+ viewID + " context: " + context);
         mViewID = viewID;
-        this.mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
+        /*this.mSurfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
             @Override
             public void surfaceCreated(SurfaceHolder holder) {
                 ZegoLogJNI.logNotice("ZegoPlatformView Created, viewID: " + mViewID);
@@ -30,10 +31,10 @@ public class ZegoPlatformView implements PlatformView {
             public void surfaceDestroyed(SurfaceHolder holder) {
                 ZegoLogJNI.logNotice("ZegoPlatformView Destroyed, viewID: " + mViewID);
             }
-        });
+        });*/
     }
 
-    public SurfaceView getSurfaceView() {
+    public TextureView getSurfaceView() {
         return mSurfaceView;
     }
 

@@ -680,9 +680,9 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
       int viewID = numberToIntValue((Number) call.argument("viewID"));
       ZegoPlatformView view = ZegoPlatformViewFactory.shareInstance().getPlatformView(viewID);
       if(view != null) {
-          int width = view.getSurfaceView().getHolder().getSurfaceFrame().width();
-          int height = view.getSurfaceView().getHolder().getSurfaceFrame().height();
-          ZegoLogJNI.logNotice("[SetPreviewView - ZegoPlatformView] view size: " + "(" + width + ", " + height + ")" + "viewID:" + viewID);
+          //int width = view.getSurfaceView().getHolder().getSurfaceFrame().width();
+          //int height = view.getSurfaceView().getHolder().getSurfaceFrame().height();
+          //ZegoLogJNI.logNotice("[SetPreviewView - ZegoPlatformView] view size: " + "(" + width + ", " + height + ")" + "viewID:" + viewID);
       }else {
 
       }
@@ -969,9 +969,9 @@ public class ZegoLiveRoomPlugin implements MethodCallHandler, EventChannel.Strea
           int viewID = numberToIntValue((Number) call.argument("viewID"));
           view = ZegoPlatformViewFactory.shareInstance().getPlatformView(viewID);
           if(view != null) {
-            int width = view.getSurfaceView().getHolder().getSurfaceFrame().width();
-            int height = view.getSurfaceView().getHolder().getSurfaceFrame().height();
-            ZegoLogJNI.logNotice("[StartPlayingStream - ZegoPlatformView] view size: " + "(" + width + ", " + height + ")" + "viewID: " + viewID);
+            //int width = view.getSurfaceView().getHolder().getSurfaceFrame().width();
+            //int height = view.getSurfaceView().getHolder().getSurfaceFrame().height();
+            //ZegoLogJNI.logNotice("[StartPlayingStream - ZegoPlatformView] view size: " + "(" + width + ", " + height + ")" + "viewID: " + viewID);
           } else {
             ZegoLogJNI.logNotice("[StartPlayingStream - ZegoPlatformView] no such view");
           }
