@@ -61,18 +61,15 @@ public class ZegoPlatformViewFactory extends PlatformViewFactory{
 
         ZegoLogJNI.logNotice("ZegoPlatFormViewFactory create view, viewID: " + viewID + ", args: " + args);
         HashMap<String, Object> map = (HashMap<String, Object>) args;
-        Integer objWidth = (Integer) map.get("width");
-        Integer objHeight = (Integer) map.get("height");
-        int width = objWidth != null ? objWidth.intValue() : 0;
-        int height = objHeight != null ? objHeight.intValue() : 0;
-       /*System.out.println("[ZegoPlatformViewfactory] create view, viewID: " + viewID + ", args: " + args);
+        int width = 0;
+        int height = 0;
+        if(map != null) {
+            Integer objWidth = (Integer) map.get("width");
+            Integer objHeight = (Integer) map.get("height");
+            width = objWidth != null ? objWidth.intValue() : 0;
+            height = objHeight != null ? objHeight.intValue() : 0;
+        }
 
-        Integer objWidth = (Integer) map.get("width");
-        Integer objHeight = (Integer) map.get("height");
-        Boolean objIsSurfaceView = (Boolean) map.get("isSurfaceView");
-        int width = objWidth != null ? objWidth.intValue() : 0;
-        int height = objHeight != null ? objHeight.intValue() : 0;
-        boolean isSurfaceView = objIsSurfaceView != null ? objIsSurfaceView.booleanValue() : true;*/
         ZegoPlatformView view = new ZegoPlatformView(context, viewID, width, height);
         addView(viewID, view);
 
